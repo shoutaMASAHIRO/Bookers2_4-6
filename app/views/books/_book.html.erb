@@ -1,0 +1,46 @@
+<h1>User info</h1>
+<table>
+  <tr>
+    <th><%= image_tag user.get_profile_image(100,100) %></th>
+  </tr>
+  <tr>
+    <td>name:</td>
+    <td><%= user.name %></td>
+  </tr>
+  <tr>
+    <td>introduction:</td>
+    <td><%= user.introduction %></td>
+  </tr>
+  <tr>
+    <td>
+    <% if user.id == current_user.id %>
+      <%= link_to edit_user_path(user.id) do %>
+        <i class="fas fa-user-cog"></i>
+      <% end %>
+    <% end %>
+    </td>
+  </tr>
+</table>
+
+<h1>New book</h1>
+<% if book.errors.any? %> 
+	<h3><%= book.errors.count %> errors occurred</h3>
+	<ul>
+    <% book.errors.full_messages.each do |message| %> 
+				<li><%= message %></li>
+		<% end %>
+	</ul>
+<% end %>
+
+<%= form_with model: book, url: '/books', method: :post do |f| %>
+  
+  <h4>Title</h4>
+  <%= f.text_field :title %>
+  
+  <h4>Body</h4>
+  <%= f.text_area :body %>
+
+  <br></br>
+  <%= f.submit 'Create Book' %>
+  
+<% end %>
