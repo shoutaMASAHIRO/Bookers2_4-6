@@ -9,6 +9,18 @@ class User < ApplicationRecord
   has_many :book_comments, dependent: :destroy
   has_many :favorites, dependent: :destroy
 
+  # フォローしている関係（自分がフォロワー）
+  has_many :active_relationships, class_name: "Relationship",
+  foreign_key: "follower_id",
+  dependent: :destroy
+  has_many :following, through: :active_relationships, source: :followed
+
+  # フォローされている関係（自分がフォローされている）
+  has_many :passive_relationships, class_name: "Relationship",
+      foreign_key: "followed_id",
+      dependent: :destroy
+  has_many :followers, through: :passive_relationships, source: :follower
+
   validates :name, presence: true,length: { minimum: 2 ,maximum: 20},uniqueness: true
   validates :introduction,length: { maximum: 50}
 
@@ -20,6 +32,47 @@ class User < ApplicationRecord
       profile_image.attach(io: File.open(file_path), filename: 'default-image.jpg', content_type: 'image/jpeg')
     end
     profile_image.variant(resize_to_limit: [width, height]).processed
+  end
+
+  # フォローする
+  def follow(other_user)
+    active_relationships.create(followed_id: other_user.id)
+  end
+
+  # フォローを外す
+  def unfollow(other_user)
+    active_relationships.find_by(followed_id: other_user.id)&.destroy
+  end
+
+  # フォローしているか？
+  def following?(other_user)
+    following.include?(other_user)
+  end
+
+  def self.search(method, word)
+    case method
+    when "perfect"
+      where(name: word)
+    when "forward"
+      where("name LIKE ?", "#{word}%")
+    when "backward"
+      where("name LIKE ?", "%#{word}")
+    when "partial"
+      where("name LIKE ?", "%#{word}%")
+    end
+  end
+
+  def self.search_for(word, method)
+    case method
+    when 'perfect'
+      where(name: word)
+    when 'forward'
+      where('name LIKE ?', "#{word}%")
+    when 'backward'
+      where('name LIKE ?', "%#{word}")
+    when 'partial'
+      where('name LIKE ?', "%#{word}%")
+    end
   end
 
 end

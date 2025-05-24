@@ -20,7 +20,13 @@
     <% end %>
     </td>
   </tr>
+
 </table>
+<p>
+  <%= link_to "Following: #{user.following.count}", following_user_path(user), class: "btn btn-outline-primary btn-sm d-block my-1" %>
+  <%= link_to "Followers: #{user.followers.count}", followers_user_path(user), class: "btn btn-outline-primary btn-sm d-block my-1" %>
+  <%= render 'users/follow_button', user: @user %>
+</p>
 
 <h1>New book</h1>
 <% if book.errors.any? %> 

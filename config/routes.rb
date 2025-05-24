@@ -1,16 +1,22 @@
 Rails.application.routes.draw do
-
   root to: "homes#top"
-  get "home/about" =>"homes#about",as: "about"
+  get "home/about" => "homes#about", as: "about"
+  get "search" => "searches#search"
 
-  devise_for :users#下に書くとusersコントローラーにオーバーロードされsign_inページに遷移できなくなるので注意！！
+
+  devise_for :users
 
   resources :books, only: [:create, :index, :show, :destroy, :edit, :update] do
     resources :book_comments, only: [:create, :destroy]
-    resource :favorites, only: [:create, :destroy]
+    resources :favorites, only: [:create, :destroy]
   end
 
-  resources :users, only: [:index, :show, :edit, :update]
+  resources :users, only: [:index, :show, :edit, :update] do
+    member do
+      get :following
+      get :followers
+    end
+  end
 
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  resources :relationships, only: [:create, :destroy]  
 end

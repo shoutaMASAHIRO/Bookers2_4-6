@@ -14,6 +14,10 @@
               <% end %>
               <h5 class="card-title"><%= user.name %></h5>
               <p class="card-text"><%= link_to "Show", user_path(user.id) %></p>
+              <div class="user">
+              <p><%= link_to user.name, user_path(user) %></p>
+              <%= render 'follow_button', user: user %>
+            </div>
             </div>
           </div>
         <% end %>
@@ -21,3 +25,14 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (!sessionStorage.getItem("reloaded_once")) {
+      sessionStorage.setItem("reloaded_once", "true");
+      setTimeout(function () {
+        window.location.reload();
+      }, 100); // 0.1秒後にリロード
+    }
+  });
+</script>

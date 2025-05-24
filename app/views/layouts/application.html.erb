@@ -8,8 +8,9 @@
     <script src="https://kit.fontawesome.com/9e2ec3ed1e.js" crossorigin="anonymous"></script>
     <%= stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <meta name="turbo-cache-control" content="no-cache">
+    <meta name="turbo-visit-control" content="reload">
   </head>
-
 
   <body class="d-flex flex-column vh-100">
     <header class="shadow-sm">
@@ -21,40 +22,87 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav ml-auto">
-            <% if user_signed_in? %>
-            <li class="nav-item">
-              <i class="fas fa-home"></i><%= link_to 'Home', user_path(current_user.id)%>
-            </li>
-            <li class="nav-item">
-              <i class="fas fa-users"></i><%= link_to ' Users ', users_path %>
-            </li>
-            <li class="nav-item">
-              <i class="fas fa-book-open"></i><%= link_to ' Books ', books_path %>
-            </li>
-            <li class="nav-item">
-              <i class="fas fa-sign-out-alt"></i><%= link_to " Log out ", destroy_user_session_path, method: :delete %><!--users/sign_out-->
-            </li>
-            <% else %>
-             <li class="nav-item">
-              <i class="fas fa-home"></i><%= link_to 'Home', root_path%>
-            </li>
-            <li class="nav-item">
-              <i class="fas fa-link"></i><%= link_to ' About ', about_path %>
-            </li>
-            <li class="nav-item">
-              <i class="fas fa-user-plus"></i><%= link_to " Sign up ", new_user_registration_path %><!--users/sign_up-->
-            </li>
-            <li class="nav-item">
-              <i class="fas fa-sign-in-alt"></i><%= link_to " Log in ", new_user_session_path %><!--users/sign_in-->
-            </li>
-            <% end %>
+              <% if user_signed_in? %>
+                <li class="nav-item">
+                  <i class="fas fa-home"></i><%= link_to 'Home', user_path(current_user.id) %>
+                </li>
+                <li class="nav-item">
+                  <i class="fas fa-users"></i>
+                  <%= link_to ' Users ', users_path, data: { reload_after: true } %>
+                </li>
+                <li class="nav-item">
+                  <i class="fas fa-book-open"></i><%= link_to ' Books ', books_path %>
+                </li>
+                <li class="nav-item">
+                  <i class="fas fa-sign-out-alt"></i><%= link_to " Log out ", destroy_user_session_path, method: :delete %>
+                </li>
+              <% else %>
+                <li class="nav-item">
+                  <i class="fas fa-home"></i><%= link_to 'Home', root_path %>
+                </li>
+                <li class="nav-item">
+                  <i class="fas fa-link"></i><%= link_to ' About ', about_path %>
+                </li>
+                <li class="nav-item">
+                  <i class="fas fa-user-plus"></i><%= link_to " Sign up ", new_user_registration_path %>
+                </li>
+                <li class="nav-item">
+                  <i class="fas fa-sign-in-alt"></i><%= link_to " Log in ", new_user_session_path %>
+                </li>
+              <% end %>
             </ul>
           </div>
         </div>
       </nav>
     </header>
+
+    <% if user_signed_in? %>
+      <div class="bg-light py-3">
+        <div class="container">
+          <%= form_with url: search_path, method: :get, local: true, class: "form-inline row g-2 justify-content-center" do %>
+            <div class="col-auto">
+              <%= select_tag :range, options_for_select([['User', 'User'], ['Book', 'Book']]), class: "form-select" %>
+            </div>
+            <div class="col-auto">
+              <%= select_tag :search_method, options_for_select([
+                ['完全一致', 'perfect'],
+                ['前方一致', 'forward'],
+                ['後方一致', 'backward'],
+                ['部分一致', 'partial']
+              ]), class: "form-select" %>
+            </div>
+            <div class="col-auto">
+              <%= text_field_tag :word, params[:word], class: "form-control", placeholder: "検索ワード" %>
+            </div>
+            <div class="col-auto">
+              <%= submit_tag "検索", class: "btn btn-primary" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
     <main class="mb-auto">
-    <%= yield %>
+      <%= yield %>
     </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // ページ遷移後に一度だけリロード
+        if (sessionStorage.getItem('users_index_reload')) {
+          sessionStorage.removeItem('users_index_reload');
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        }
+
+        // Usersリンククリック時にフラグを保存
+        document.querySelectorAll('a[data-reload-after]').forEach(link => {
+          link.addEventListener('click', () => {
+            sessionStorage.setItem('users_index_reload', 'true');
+          });
+        });
+      });
+    </script>
   </body>
 </html>

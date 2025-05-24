@@ -1,0 +1,8 @@
+<div class="user-stats">
+  <p>
+    <%= link_to "Following (#{@user.following.count})", following_user_path(@user) %>
+  </p>
+  <p>
+    <%= link_to "Followers (#{@user.followers.count})", followers_user_path(@user) %>
+  </p>
+</div>
